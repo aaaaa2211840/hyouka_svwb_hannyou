@@ -2,18 +2,35 @@
 // 評価スプレッドシート自動生成スクリプト（高速版）
 // 使い方: このコードをApps Scriptに貼り付けて「createEvaluationSheet」を実行
 // ============================================================
-items={
-    "E":  ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
-    "R":  ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
-    "W":  ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
-    "D":  ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
-    "Ni": ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
-    "B":  ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
-    "Nm": ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
-  };
+
+// ★ 項目名の設定（ページ名をキーに項目名リストを定義）★
+const items = {
+  "E":  ["l1", "l2", "g1", "g2", "s1", "s2", "s3", "b1", "b2", "b3", "クラス評価"],
+  "R":  ["l1", "l2", "g1", "g2", "s1", "s2", "s3", "b1", "b2", "b3", "クラス評価"],
+  "W":  ["l1", "l2", "g1", "g2", "s1", "s2", "s3", "b1", "b2", "b3", "クラス評価"],
+  "D":  ["l1", "l2", "g1", "g2", "s1", "s2", "s3", "b1", "b2", "b3", "クラス評価"],
+  "Ni": ["l1", "l2", "g1", "g2", "s1", "s2", "s3", "b1", "b2", "b3", "クラス評価"],
+  "B":  ["l1", "l2", "g1", "g2", "s1", "s2", "s3", "b1", "b2", "b3", "クラス評価"],
+  "Nm": ["l1", "l2", "g1", "g2", "s1", "s2", "s3", "b1", "b2", "b3", "クラス評価"],
+  "N":  ["l1", "l2", "g1", "g2", "s1", "s2", "s3", "b1", "b2", "b3", "クラス評価"],
+};
+
+// ★ ふりかえりシートの行ラベル ★
+const summaryItemNames = ["L1","L2","G1","G2","S1","S2","S3","B1","B2","B3","クラス評価"];
 
 function createEvaluationSheet() {
-  n=5;  
+  // ============================================================
+  // ★ 設定項目（ここだけ変更すればOK）★
+
+  const n = 5;  // 評価列の数（①②③…好きな数に変更可、最大⑩）
+
+  const pageNames = ["E","R","W","D","Ni","B","Nm","N"];  // ページ名
+
+  const itemNames = items;  // 上の items を参照
+
+  const ITEMS = 11;  // 各ページの項目数
+  // ============================================================
+
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
   // 一時シートを用意（既存なら再利用、なければ新規作成）
@@ -23,21 +40,8 @@ function createEvaluationSheet() {
   sheetsToDelete.forEach(s => ss.deleteSheet(s));
   SpreadsheetApp.flush();
 
-  // ============================================================
-  // ★ 設定項目（ここだけ変更すればOK）★
-
-  const N = n;  // 評価列の数（①②③…好きな数に変更可、最大⑩）
-
-  const pageNames = ["E","R","W","D","Ni","B","Nm"];  // ページ名
-
-  // 各ページの項目名（ページ名と同じ順番で設定）
-  // 項目数はページごとに異なってもOK。足りない分は「項目N」で自動補完されます。
-  const itemNames = items
-
-  const ITEMS = 9;  // 各ページの項目数（itemNamesの要素数に合わせてください）
-  // ============================================================
-
-  const PAGE_COLORS  = ["#3A7CA5","#2E86AB","#1D6FA4","#2563A8","#1B6CA8","#2076B4","#165C8A"];
+  const N = n;
+  const PAGE_COLORS  = ["#3A7CA5","#2E86AB","#1D6FA4","#2563A8","#1B6CA8","#2076B4","#165C8A","#0F4C75"];
   const HEADER_BG    = "#2E4057";
   const HEADER_FG    = "#FFFFFF";
   const ROW_ODD      = "#F7F9FC";
@@ -46,17 +50,14 @@ function createEvaluationSheet() {
   const SUMMARY_BG   = "#1A3A5C";
 
   // 評価列ヘッダー（①②③④…）を動的生成
-  const circledNums  = ["①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩"];
+  const circledNums   = ["①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩"];
   const ratingHeaders = Array.from({length: N}, (_, i) => `評価${circledNums[i]}`);
 
-  // スプレッドシートの列文字（B, C, D, E, ...）を動的生成
-  const colLetters = Array.from({length: N}, (_, i) =>
-    String.fromCharCode(66 + i) // B=66, C=67, ...
-  );
+  // 列文字（B, C, D, E, ...）を動的生成
+  const colLetters = Array.from({length: N}, (_, i) => String.fromCharCode(66 + i));
 
-  // 各ページの総列数（項目1列 + 評価N列 + コメント1列）
   const PAGE_TOTAL_COLS = 1 + N + 1;
-  const commentCol = 2 + N; // コメント列番号
+  const commentCol = 2 + N;
 
   const dvRule = SpreadsheetApp.newDataValidation()
     .requireValueInList(["S","A","B","C","D"], true)
@@ -64,7 +65,7 @@ function createEvaluationSheet() {
     .setHelpText("S, A, B, C, D から選択してください")
     .build();
 
-  // ── ページ1〜8 作成 ──────────────────────────────────────
+  // ── 各ページ作成 ─────────────────────────────────────────
   pageNames.forEach((pageName, pi) => {
     const ws = ss.insertSheet(pageName);
 
@@ -77,8 +78,8 @@ function createEvaluationSheet() {
     ws.setRowHeight(1, 36);
 
     // ヘッダー行（一括）
-    const headerValues = [["項目", ...ratingHeaders, "コメント"]];
-    ws.getRange(2, 1, 1, PAGE_TOTAL_COLS).setValues(headerValues)
+    ws.getRange(2, 1, 1, PAGE_TOTAL_COLS)
+      .setValues([["項目", ...ratingHeaders, "コメント"]])
       .setBackground(HEADER_BG).setFontColor(HEADER_FG)
       .setFontWeight("bold").setHorizontalAlignment("center").setVerticalAlignment("middle")
       .setBorder(true,true,true,true,true,true,"#888888", SpreadsheetApp.BorderStyle.SOLID);
@@ -121,7 +122,7 @@ function createEvaluationSheet() {
     ws.setColumnWidths(commentCol, 1, 260);
   });
 
-  // ── まとめシート 作成 ────────────────────────────────────
+  // ── ふりかえりシート作成 ──────────────────────────────────
   const ws = ss.insertSheet("ふりかえり");
   const TOTAL_COLS = 1 + pageNames.length * N;
 
@@ -164,8 +165,7 @@ function createEvaluationSheet() {
   // データ行（数式を一括セット）
   const dataRows = [];
   for (let ri = 0; ri < ITEMS; ri++) {
-    const firstPageNames = itemNames[pageNames[0]] || [];
-    const row = [firstPageNames[ri] || `項目${ri + 1}`];
+    const row = [summaryItemNames[ri] || `項目${ri + 1}`];
     const srcRow = ri + 3;
     pageNames.forEach(pageName => {
       colLetters.forEach(col => row.push(`='${pageName}'!${col}${srcRow}`));
@@ -174,7 +174,7 @@ function createEvaluationSheet() {
   }
   ws.getRange(4, 1, ITEMS, TOTAL_COLS).setValues(dataRows);
 
-  // まとめデータ書式（一括）
+  // ふりかえりデータ書式（一括）
   ws.getRange(4, 1, ITEMS, TOTAL_COLS)
     .setFontWeight("bold").setHorizontalAlignment("center").setVerticalAlignment("middle")
     .setBorder(true,true,true,true,true,true,"#CCCCCC", SpreadsheetApp.BorderStyle.SOLID);
@@ -186,13 +186,13 @@ function createEvaluationSheet() {
   }
 
   // 列幅
-  ws.setColumnWidths(1, 1, 80);
+  ws.setColumnWidths(1, 1, 100);
   ws.setColumnWidths(2, pageNames.length * N, 70);
 
-  // 一時シート削除・まとめを末尾へ
+  // 一時シート削除・ふりかえりを末尾へ
   ss.deleteSheet(tempSheet);
   ss.setActiveSheet(ws);
   ss.moveActiveSheet(ss.getNumSheets());
 
-  SpreadsheetApp.getUi().alert("✅ 作成完了！\nE, R, W, D, Ni, B, Nm, まとめ と サマリーシート が生成されました。");
+  SpreadsheetApp.getUi().alert("✅ 作成完了！\nE, R, W, D, Ni, B, Nm, N と ふりかえりシート が生成されました。");
 }
