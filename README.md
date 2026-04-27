@@ -1,6 +1,8 @@
 # hyouka_svwb_hannyou
 svwbの評価シートを作るためのもの。
 
+評価人数Nはgsファイル冒頭のNの値を変更すればokです
+
 手順
 
 Google スプレッドシートを新規作成
