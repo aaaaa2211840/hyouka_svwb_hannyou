@@ -2,10 +2,18 @@
 // 評価スプレッドシート自動生成スクリプト（高速版）
 // 使い方: このコードをApps Scriptに貼り付けて「createEvaluationSheet」を実行
 // ============================================================
-
-n=5;
+items={
+    "E":  ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
+    "R":  ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
+    "W":  ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
+    "D":  ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
+    "Ni": ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
+    "B":  ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
+    "Nm": ["l1", "l2", "g1", "g2", "s1", "s2", "b1", "b2", "クラス評価"],
+  };
 
 function createEvaluationSheet() {
+  n=5;  
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
   // 一時シートを用意（既存なら再利用、なければ新規作成）
@@ -17,9 +25,16 @@ function createEvaluationSheet() {
 
   // ============================================================
   // ★ 設定項目（ここだけ変更すればOK）★
-  const N         = n;  // 評価列の数（①②③…好きな数に変更可、最大⑩）
-  const ITEMS     = 9;  // 各ページの項目数
-  const pageNames = ["E","R","W","D","Ni","B","Nm"];
+
+  const N = n;  // 評価列の数（①②③…好きな数に変更可、最大⑩）
+
+  const pageNames = ["E","R","W","D","Ni","B","Nm"];  // ページ名
+
+  // 各ページの項目名（ページ名と同じ順番で設定）
+  // 項目数はページごとに異なってもOK。足りない分は「項目N」で自動補完されます。
+  const itemNames = items
+
+  const ITEMS = 9;  // 各ページの項目数（itemNamesの要素数に合わせてください）
   // ============================================================
 
   const PAGE_COLORS  = ["#3A7CA5","#2E86AB","#1D6FA4","#2563A8","#1B6CA8","#2076B4","#165C8A"];
@@ -71,7 +86,8 @@ function createEvaluationSheet() {
 
     // データ行を一括セット
     const emptyRow = Array(PAGE_TOTAL_COLS).fill("");
-    const itemLabels = Array.from({length: ITEMS}, (_, i) => [`項目${i+1}`, ...emptyRow.slice(1)]);
+    const names = itemNames[pageName] || [];
+    const itemLabels = Array.from({length: ITEMS}, (_, i) => [names[i] || `項目${i+1}`, ...emptyRow.slice(1)]);
     ws.getRange(3, 1, ITEMS, PAGE_TOTAL_COLS).setValues(itemLabels);
 
     // 項目列書式
@@ -148,7 +164,8 @@ function createEvaluationSheet() {
   // データ行（数式を一括セット）
   const dataRows = [];
   for (let ri = 0; ri < ITEMS; ri++) {
-    const row = [`項目${ri + 1}`];
+    const firstPageNames = itemNames[pageNames[0]] || [];
+    const row = [firstPageNames[ri] || `項目${ri + 1}`];
     const srcRow = ri + 3;
     pageNames.forEach(pageName => {
       colLetters.forEach(col => row.push(`='${pageName}'!${col}${srcRow}`));
